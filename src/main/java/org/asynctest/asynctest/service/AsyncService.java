@@ -23,4 +23,34 @@ public class AsyncService {
             return CompletableFuture.completedFuture("에러 발생");
         }
     }
+
+
+    /**
+     *  연속된 비동기 처리를 담당하는 쓰레드는 누구인가?
+     */
+    @Async
+    public CompletableFuture<String> asyncTest4FirstTask() {
+        try {
+            Thread.sleep(3000);
+            log.info("첫번째 비동기 처리를 하는 쓰레드: {}", Thread.currentThread().getName());
+            return CompletableFuture.completedFuture("첫번째");
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            return CompletableFuture.completedFuture("에러 발생");
+        }
+    }
+    @Async
+    public CompletableFuture<String> asyncTest4SecondTask(String s) {
+        try {
+            Thread.sleep(3000);
+            log.info("두번째 비동기 처리를 하는 쓰레드: {}", Thread.currentThread().getName());
+            return CompletableFuture.completedFuture(s + " 두번째");
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            return CompletableFuture.completedFuture("에러 발생");
+        }
+    }
+
+
+
 }
