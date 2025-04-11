@@ -3,6 +3,7 @@ package org.asynctest.asynctest.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.asynctest.asynctest.service.AsyncService;
+import org.asynctest.asynctest.service.SyncService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,7 @@ import java.util.concurrent.ExecutionException;
 public class AsyncController {
 
     private final AsyncService asyncService;
-
+    private final SyncService syncService;
 
     /**
      *  1. 비동기 작업
@@ -133,6 +134,72 @@ public class AsyncController {
 
         log.info("컨트롤러 다음 줄 실행");
         return ResponseEntity.ok("비동기 작업 완료");
-        
     }
+
+
+    /**
+     *  5. 비동기 처리와 동기 처리의 차이
+     */
+    @GetMapping("/async/test5-1") // 동기처리
+    public ResponseEntity<String> asyncTest5_1(){
+        log.info("/async/test5-1 동기 처리중");
+        long start = System.currentTimeMillis(); // 시작 시간
+
+        syncService.syncProc1(); // 처리 1 기다림
+        syncService.syncProc2(); // 처리 2 기다림
+        syncService.syncProc3(); // 처리 3 기다림
+
+
+        long end = System.currentTimeMillis(); // 끝 시간
+        log.info("실행 처리 시간 useTime: {}", (end - start));
+        /**
+         *  === 동기 처리속도 기록 ===
+         *      실행 처리 시간 useTime: 9022
+         *      실행 처리 시간 useTime: 9028
+         *      실행 처리 시간 useTime: 9014
+         */
+        return ResponseEntity.ok("비동기 작업 완료");
+    }
+    @GetMapping("/async/test5-2") // 비동기 처리
+    public ResponseEntity<String> asyncTest5_2(){
+        log.info("/async/test5-2 실행중");
+        long start = System.currentTimeMillis(); // 시작 시간
+
+        log.info("비동기 작업 확인 future1,2,3 전");
+        CompletableFuture<Void> future1 = asyncService.asyncProc1();
+        CompletableFuture<Void> future2 = asyncService.asyncProc2();
+        CompletableFuture<Void> future3 = asyncService.asyncProc3();
+        log.info("비동기 작업 확인 future1,2,3 후");
+
+        log.info("비동기 작업 확인 futures 전");
+        CompletableFuture<Void> futures = CompletableFuture.allOf(future1, future2, future3);
+        log.info("비동기 작업 확인 futures 후");
+
+        // 시간 측정 방식
+            // 1. 블로킹
+        Void join = futures.join();
+        long end = System.currentTimeMillis(); // 끝 시간
+        log.info("실행 처리 시간 useTime: {}", (end - start));
+        
+            // 2. 비동기 콜백 함수
+//        futures.thenAccept(v -> {
+//            long end = System.currentTimeMillis(); // 끝 시간
+//            log.info("실행 처리 시간 useTime: {}", (end - start));
+//        });
+
+        /**
+         *  === 비동기 처리 속도 측정 ===
+         *      1. 블로킹 방식
+         *          실행 처리 시간 useTime: 3007
+         *          실행 처리 시간 useTime: 3004
+         *          실행 처리 시간 useTime: 3002
+         *
+         *      2. 비동기 콜백 함수
+         *          실행 처리 시간 useTime: 3009
+         *          실행 처리 시간 useTime: 3015
+         *          실행 처리 시간 useTime: 3003
+         */
+        return ResponseEntity.ok("비동기 작업 완료");
+    }
+    
 }

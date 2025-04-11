@@ -51,6 +51,42 @@ public class AsyncService {
         }
     }
 
+    /**
+     *  동기와 비동기의 처리 요청에 대한 시간 계산
+     */
+    @Async
+    public CompletableFuture<Void> asyncProc1() {
+        log.info("비동기 처리 asyncProc1 처리 시작");
+        try {
+            Thread.sleep(3000);
+            log.info("비동기 처리 asyncProc1 처리끝");
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+        }
+        return CompletableFuture.completedFuture(null);
+    }
+    @Async
+    public CompletableFuture<Void> asyncProc2() {
+        log.info("비동기 처리 asyncProc2 처리 시작");
+        try {
+            Thread.sleep(3000);
+            log.info("비동기 처리 asyncProc2 처리끝");
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+        }
+        return CompletableFuture.completedFuture(null);
+    }
+    @Async
+    public CompletableFuture<Void> asyncProc3() {
+        log.info("비동기 처리 asyncProc3 처리 시작");
+        try {
+            Thread.sleep(3000);
+            log.info("비동기 처리 asyncProc3 처리끝");
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+        }
+        return CompletableFuture.completedFuture(null);
+    }
 
 
 }
