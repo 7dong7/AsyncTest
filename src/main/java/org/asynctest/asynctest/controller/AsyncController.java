@@ -139,6 +139,7 @@ public class AsyncController {
 
     /**
      *  5. 비동기 처리와 동기 처리의 차이
+     *      비동기 처리와 동기 처리의 시간을 계산
      */
     @GetMapping("/async/test5-1") // 동기처리
     public ResponseEntity<String> asyncTest5_1(){
@@ -177,15 +178,15 @@ public class AsyncController {
 
         // 시간 측정 방식
             // 1. 블로킹
-        Void join = futures.join();
-        long end = System.currentTimeMillis(); // 끝 시간
-        log.info("실행 처리 시간 useTime: {}", (end - start));
+//        Void join = futures.join();
+//        long end = System.currentTimeMillis(); // 끝 시간
+//        log.info("실행 처리 시간 useTime: {}", (end - start));
         
             // 2. 비동기 콜백 함수
-//        futures.thenAccept(v -> {
-//            long end = System.currentTimeMillis(); // 끝 시간
-//            log.info("실행 처리 시간 useTime: {}", (end - start));
-//        });
+        futures.thenAccept(v -> {
+            long end = System.currentTimeMillis(); // 끝 시간
+            log.info("실행 처리 시간 useTime: {}", (end - start));
+        });
 
         /**
          *  === 비동기 처리 속도 측정 ===
@@ -198,8 +199,23 @@ public class AsyncController {
          *          실행 처리 시간 useTime: 3009
          *          실행 처리 시간 useTime: 3015
          *          실행 처리 시간 useTime: 3003
+         *          
+         *          
+         *  위의 "블로킹 방식"과 "비동기 콜백 함수 방식"이 있다
+         *      이러한 경우 두번째 방식인 "비동기 콜백 함수 방식" 으로 비동기 처리에 대한 흐름을 지속적으로 유지해야 된다
+         *      
+         *   === 왜 그렇게 해야되는가? ===
+         *      첫번째 방식인 블로킹방식으로 결과를 종합하게 되면 결국에는 비동기 처리에 대한 결과를 처리하기 위해서
+         *      요청 쓰레드가 블록킹된 상태가 된다. 이런 상태는 전체적인 서버 관점에서 다른 여러 사용자가 있는 관점에서 보면
+         *      다른 사용자들의 요청을 처리하기 위한 전체 사용가능한 쓰레드의 숫자가 줄어들기 때문에 지양해야되는 방식
+         *      
+         *      결과적으로 사용자의 요청과 응답에 대해서는 블로킹 방식과 논블로킹 방식의 처리 시간은 비슷하나
+         *      블로킹방식의 경우 서버에서 가용되는 쓰레드를 빠르게 고갈시키기 때문에 전체적인 서버의 응답이 늦어지는
+         *      결과를 낳게 된다
+         *
+         *      따라서 요청 쓰레드를 빠르게 반환시켜 쓰레드 고갈을 늦추고, 비동기처리에 대한 흐름은
+         *      thenApply, thenCompose, thenAccept 와 같은 비동기 처리로 흐름을 가져가야 한다
          */
         return ResponseEntity.ok("비동기 작업 완료");
     }
-    
 }
