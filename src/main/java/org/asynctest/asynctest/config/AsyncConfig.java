@@ -10,7 +10,7 @@ import java.util.concurrent.Executor;
 public class AsyncConfig {
 
     @Bean
-    public Executor taskExecutor() {
+    public ThreadPoolTaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5); // 기본 스레디의 수
         executor.setMaxPoolSize(10); // 최대 스레드 수
